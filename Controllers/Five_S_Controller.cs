@@ -29,9 +29,13 @@ namespace HSE_5S_API.Controllers
         }
 
         [HttpPost]
+        [RequestFormLimits(MultipartBodyLengthLimit =15360000)]
+        [RequestSizeLimit(15360000)]
         [Route("PostFile")]
         public async Task<string> Post([FromForm] FileUploadAPI file)
         {
+            string host = "192.168.0.12:8080";
+            string host_dev = "localhost:5000";
             if(file.files.Length >0)
             {
                 try
@@ -44,7 +48,7 @@ namespace HSE_5S_API.Controllers
                     {
                         file.files.CopyTo(fileStream);
                         fileStream.Flush();
-                        return(_environment.WebRootPath+ "\\uploads\\"+file.files.FileName);
+                        return(host+ "\\uploads\\"+file.files.FileName);
                     }
                 }
                 catch(Exception ex)
@@ -65,6 +69,26 @@ namespace HSE_5S_API.Controllers
         {
             DataTable dta = new DataTable();
             dta = clmv.getClassify();
+            var json_result = JsonConvert.SerializeObject(dta);
+            return json_result;
+        }
+
+        [HttpGet]
+        [Route("GetLocation")]
+        public string getLocation()
+        {
+            DataTable dta = new DataTable();
+            dta = clmv.getLocation();
+            var json_result = JsonConvert.SerializeObject(dta);
+            return json_result;
+        }
+
+        [HttpGet]
+        [Route("GetDepartment")]
+        public string GetDepartment()
+        {
+            DataTable dta = new DataTable();
+            dta = clmv.getDepartment();
             var json_result = JsonConvert.SerializeObject(dta);
             return json_result;
         }
@@ -102,7 +126,7 @@ namespace HSE_5S_API.Controllers
         public ActionResult postImprovement([FromBody] Improvement improvement)
         {
             clmv.PostImprovment(improvement);
-            return Ok("OK con dê ^^");
+            return Ok("OK");
         }
 
         [HttpPost]
@@ -110,7 +134,7 @@ namespace HSE_5S_API.Controllers
         public ActionResult postUser([FromBody]_User user)
         {
             clmv.PostUser(user);
-            return Ok("Ok nhe!");
+            return Ok("Ok");
         }
 
         [HttpPost]

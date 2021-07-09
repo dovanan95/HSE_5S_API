@@ -38,6 +38,34 @@ public class DAO
         return dt;
 
     }
+
+     public DataTable getDepartment()
+    {
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand();
+        cmd.Connection = con;
+        cmd.CommandText = "select * from Department";
+        con.Open();
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        con.Close();
+        return dt;
+
+    }
+    public DataTable getLocation()
+    {
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand();
+        cmd.Connection = con;
+        cmd.CommandText = "select ID_Location, Name_Location from Location";
+        con.Open();
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        con.Close();
+        return dt;
+    }
     public DataTable getLoss()
     {
         SqlConnection con = new SqlConnection(connectionString);
@@ -124,7 +152,13 @@ public class DAO
         SqlCommand cmd = new SqlCommand();
         cmd.Connection = con;
         cmd.CommandType = CommandType.Text;
-        cmd.CommandText = "select * from [User] where ID_User = @ID and Password = @PWD";
+        cmd.CommandText = 
+        "if exists (select * from [User] where ID_User = @ID and Password =@PWD)"
+	        +"begin "
+                +"select a.ID_Function, b.Name_Function from Permission as a " 
+                +"inner join [Function] as b on a.ID_Function = b.ID_Function "
+                +"where a.ID_User=@ID and a.Status=1 and b.Type = 'Mobile' "
+	        +"end";
         cmd.Parameters.AddWithValue("@ID", login_.ID_User);
         cmd.Parameters.AddWithValue("@PWD", login_.Password);
         con.Open();

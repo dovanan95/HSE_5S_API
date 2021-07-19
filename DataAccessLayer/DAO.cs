@@ -66,6 +66,22 @@ public class DAO
         con.Close();
         return dt;
     }
+
+    public DataTable getLocation_desc()
+    {
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand();
+        cmd.Connection = con;
+        cmd.CommandType = CommandType.Text;
+        cmd.CommandText = "select * from Location_Detail";
+        con.Open();
+        DataTable dt = new DataTable();
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+        da.Fill(dt);
+        con.Close();
+        return dt;
+    }
+
     public DataTable getLoss()
     {
         SqlConnection con = new SqlConnection(connectionString);
@@ -81,31 +97,53 @@ public class DAO
     }
     public void postIssue(Issue issue)
     {
+        Int32 issue_identity;
         SqlConnection con = new SqlConnection(connectionString);
         SqlCommand cmd = new SqlCommand();
+        cmd.Connection=con;
         cmd.CommandType = CommandType.Text;
-        cmd.CommandText = "insert into Issue(Name_Issue, ID_Location, Team_Input, PIC, Time_Start, Time_End, Deadline,"
+        cmd.CommandText = "insert into Issue(Name_Issue, ID_LocationD, PIC, Time_Start,  Deadline,"
         +
-        "Status, ID_Classify, Picture, ID_Loss, Content) value(@Name_Issue, @ID_Location, @Team_Input, @PIC, @Time_Start, @Time_End, @Deadline,"
+        " Status, ID_Classify, Picture, ID_Loss, Content) output inserted.ID_Issue"
         +
-        "@Status, @ID_Classify, @Picture, @ID_Loss, @Content)";
+        " values(@Name_Issue, @ID_LocationD, @PIC, @Time_Start, @Deadline,"
+        +
+        " @Status, @ID_Classify, @Picture, @ID_Loss, @Content)";
+        
         cmd.Parameters.AddWithValue("@Name_Issue", issue.Name_issue);
-        cmd.Parameters.AddWithValue("@ID_Location", issue.Location_ID);
-        cmd.Parameters.AddWithValue("@Team_Input", issue.Team_input);
+        cmd.Parameters.AddWithValue("@ID_LocationD", issue.LocationD_ID);
         cmd.Parameters.AddWithValue("@PIC", issue.PIC);
         cmd.Parameters.AddWithValue("@Time_Start", issue.Time_Start);
-        cmd.Parameters.AddWithValue("@Time_End", issue.Time_End);
+        //cmd.Parameters.AddWithValue("@Time_End", issue.Time_End);
         cmd.Parameters.AddWithValue("@Deadline", issue.Deadline);
-        cmd.Parameters.AddWithValue("@Status", issue.Status);
+        cmd.Parameters.AddWithValue("@Status", "Pending");
         cmd.Parameters.AddWithValue("@ID_Classify", issue.ID_Classify);
         cmd.Parameters.AddWithValue("@Picture", issue.Picture);
         cmd.Parameters.AddWithValue("@ID_Loss", issue.ID_Loss);
         cmd.Parameters.AddWithValue("@Content", issue.Content);
 
         con.Open();
-        cmd.ExecuteNonQuery();
+        SqlDataAdapter da_issue = new SqlDataAdapter(cmd);
+        DataTable dt_isue = new DataTable();
+        //cmd.ExecuteNonQuery();
+        da_issue.Fill(dt_isue);
+        issue_identity = Convert.ToInt32(dt_isue.Rows[0][0]);
         con.Close();
 
+        SqlCommand cmd_imp = new SqlCommand();
+        cmd_imp.Connection=con;
+        cmd_imp.CommandType = CommandType.Text;
+        cmd_imp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id_issue, @status, @team_imp)";
+        foreach(var item in issue.improvement)
+        {
+            cmd_imp.Parameters.Clear();
+            cmd_imp.Parameters.AddWithValue("@id_issue", issue_identity);
+            cmd_imp.Parameters.AddWithValue("@status", "Pending");
+            cmd_imp.Parameters.AddWithValue("@team_imp", item);
+            con.Open();
+            cmd_imp.ExecuteNonQuery();
+            con.Close();
+        }
     }
 
     public void PostImprovment(Improvement improvement)
@@ -114,13 +152,13 @@ public class DAO
         SqlCommand cmd = new SqlCommand();
         cmd.CommandType = CommandType.Text;
         cmd.Connection = con;
-        cmd.CommandText ="insert into Improve_Issue (ID_Issue, Title, Picture, Time_Improve, Status, Content)"
-        + "values(@ID_Issue, @Title, @Picture, @Time_Improve, @Status, @Content)";
+        cmd.CommandText ="update Improve_Issue set  Title=@Title, Picture=@Picture, Time_Improve=@Time_Improve,  Content=Content "
+        + "where ID_Issue=@ID_Issue and Team_Improve = @Team_imp";
         cmd.Parameters.AddWithValue("@ID_Issue", improvement.ID_Issue);
+        cmd.Parameters.AddWithValue("@Team_imp", improvement.Team_Improve);
         cmd.Parameters.AddWithValue("@Title", improvement.Title);
         cmd.Parameters.AddWithValue("@Picture", improvement.Picture);
         cmd.Parameters.AddWithValue("@Time_Improve", improvement.Time_Improved);
-        cmd.Parameters.AddWithValue("@Status", improvement.Status);
         cmd.Parameters.AddWithValue("@Content", improvement.Content);
 
         con.Open();
@@ -155,8 +193,9 @@ public class DAO
         cmd.CommandText = 
         "if exists (select * from [User] where ID_User = @ID and Password =@PWD)"
 	        +"begin "
-                +"select a.ID_Function, b.Name_Function from Permission as a " 
+                +"select a.ID_Function, b.Name_Function, c.ID_Department from Permission as a " 
                 +"inner join [Function] as b on a.ID_Function = b.ID_Function "
+                +"inner join [User] as c on c.ID_User = a.ID_User "
                 +"where a.ID_User=@ID and a.Status=1 and b.Type = 'Mobile' "
 	        +"end";
         cmd.Parameters.AddWithValue("@ID", login_.ID_User);

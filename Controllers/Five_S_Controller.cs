@@ -84,6 +84,16 @@ namespace HSE_5S_API.Controllers
         }
 
         [HttpGet]
+        [Route("GetLocationDesc")]
+        public ActionResult<string> getLocation_desc()
+        {
+            DataTable dta = new DataTable();
+            dta = clmv.getLocation_desc();
+            var json_result = JsonConvert.SerializeObject(dta);
+            return json_result;
+        }
+
+        [HttpGet]
         [Route("GetDepartment")]
         public string GetDepartment()
         {

@@ -1,6 +1,7 @@
 
 public class Issue
 {
+    public int ID_Issue{get;set;}
     public string Name_issue{get;set;}
     public int LocationD_ID{get;set;}
     public string PIC{get;set;}

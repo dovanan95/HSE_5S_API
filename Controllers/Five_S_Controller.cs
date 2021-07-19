@@ -163,5 +163,15 @@ namespace HSE_5S_API.Controllers
                 return("NG");
             }
         }
+        
+        [HttpPost]
+        [Route("TraceGeneralIssue")]
+        public ActionResult<string> TraceGenIssue([FromBody] int numberRecord)
+        {
+            DataTable dtIS = new DataTable();
+            dtIS = clmv.generalTraceIssue(numberRecord);
+            var json_result = JsonConvert.SerializeObject(dtIS);
+            return json_result;
+        }
     }
 }

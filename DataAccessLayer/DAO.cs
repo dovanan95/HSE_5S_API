@@ -206,5 +206,28 @@ public class DAO
         con.Close();
         return dtResult_Check;
     }
+
+    //Trace Issue
+    public DataTable generalTraceIssue(int numberRecord)
+    {
+        DataTable dtGeneralIssue = new DataTable();
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand();
+        cmd.Connection = con;
+        cmd.CommandType = CommandType.Text;
+        cmd.CommandText = 
+        "select top (@numRec) a.*, b.Name_LocationDetail, c.Name_Classify, d.Name_Level "
+        +"from Issue as a "
+        +"inner join Location_Detail as b on a.ID_LocationD = b.ID_LocationD "
+        +"inner join Classify as c on a.ID_Classify = c.ID_Classify "
+        +"inner join [Level] as d on a.ID_Loss = d.ID_Level "
+        +"order by ID_Issue desc";
+        cmd.Parameters.AddWithValue("@numRec", numberRecord);
+        SqlDataAdapter daIT = new SqlDataAdapter(cmd);
+        con.Open();
+        daIT.Fill(dtGeneralIssue);
+        con.Close();
+        return dtGeneralIssue;
+    }
 }
 

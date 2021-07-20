@@ -48,7 +48,7 @@ namespace HSE_5S_API.Controllers
                     {
                         file.files.CopyTo(fileStream);
                         fileStream.Flush();
-                        return(host+ "\\uploads\\"+file.files.FileName);
+                        return(host+ "//uploads//"+file.files.FileName);
                     }
                 }
                 catch(Exception ex)

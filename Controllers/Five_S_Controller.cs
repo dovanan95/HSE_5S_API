@@ -164,9 +164,9 @@ namespace HSE_5S_API.Controllers
             }
         }
         
-        [HttpPost]
+        [HttpGet]
         [Route("TraceGeneralIssue")]
-        public ActionResult<string> TraceGenIssue([FromBody] int numberRecord)
+        public string TraceGenIssue(int numberRecord)
         {
             DataTable dtIS = new DataTable();
             dtIS = clmv.generalTraceIssue(numberRecord);

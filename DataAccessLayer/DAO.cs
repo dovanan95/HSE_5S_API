@@ -229,5 +229,20 @@ public class DAO
         con.Close();
         return dtGeneralIssue;
     }
+    public DataTable deptImprove(int ID_Issue)
+    {
+        DataTable dtDept = new DataTable();
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand();
+        cmd.Connection = con;
+        cmd.CommandType= CommandType.Text;
+        cmd.CommandText = "select Team_Improve from Improve_Issue where ID_Issue = @id_issue";
+        cmd.Parameters.AddWithValue("@id_issue", ID_Issue);
+        SqlDataAdapter daDept = new SqlDataAdapter(cmd);
+        con.Open();
+        daDept.Fill(dtDept);
+        con.Close();
+        return dtDept;
+    }
 }
 

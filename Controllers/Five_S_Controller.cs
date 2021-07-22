@@ -173,5 +173,15 @@ namespace HSE_5S_API.Controllers
             var json_result = JsonConvert.SerializeObject(dtIS);
             return json_result;
         }
+
+        [HttpGet]
+        [Route("getDeptImprove")]
+        public string getDeptImprove(int ID_Issue)
+        {
+            DataTable dtDept = new DataTable();
+            dtDept = clmv.deptImprove(ID_Issue);
+            var json_result = JsonConvert.SerializeObject(dtDept);
+            return json_result;
+        }
     }
 }

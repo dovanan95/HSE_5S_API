@@ -122,6 +122,16 @@ namespace HSE_5S_API.Controllers
             var json_result = JsonConvert.SerializeObject(data);
             return json_result;
         }
+
+        [HttpGet]
+        [Route("GetAllElementIssue")]
+        public string getAllIssueElement()
+        {
+            DataSet dsIE = new DataSet();
+            dsIE = clmv.getAllElementIssue();
+            var json_result = JsonConvert.SerializeObject(dsIE);
+            return(json_result);
+        }
         
         [HttpPost]
         [Route("PostIssue")]

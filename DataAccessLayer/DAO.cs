@@ -95,6 +95,53 @@ public class DAO
         con.Close();
         return dt;
     }
+
+    public DataSet getAllElementIssue()
+    {
+        DataSet dsTotal = new DataSet();
+        SqlConnection con = new SqlConnection(connectionString);
+
+        string getClassify = "select * from Classify";
+        string getLocation = "select ID_Location, Name_Location from Location";
+        string getLocation_desc = "select * from Location_Detail";
+        string getDepartment = "select * from Department";
+        string getLoss = "select * from Level";
+
+        SqlCommand cmdClass = new SqlCommand(getClassify, con);
+        SqlCommand cmdLoc = new SqlCommand(getLocation, con);
+        SqlCommand cmdLocD = new SqlCommand(getLocation_desc, con);
+        SqlCommand cmdPB = new SqlCommand(getDepartment, con);
+        SqlCommand cmdLoss = new SqlCommand(getLoss, con);
+
+        SqlDataAdapter daClass = new SqlDataAdapter(cmdClass);
+        SqlDataAdapter daLoc = new SqlDataAdapter(cmdLoc);
+        SqlDataAdapter daLocD = new SqlDataAdapter(cmdLocD);
+        SqlDataAdapter daPB = new SqlDataAdapter(cmdPB);
+        SqlDataAdapter daLoss = new SqlDataAdapter(cmdLoss);
+
+        DataTable dtClass = new DataTable();
+        DataTable dtLoc = new DataTable();
+        DataTable dtLocD = new DataTable();
+        DataTable dtPB = new DataTable();
+        DataTable dtLoss = new DataTable();
+
+        daClass.Fill(dtClass);
+        daLoc.Fill(dtLoc);
+        daLocD.Fill(dtLocD);
+        daPB.Fill(dtPB);
+        daLoss.Fill(dtLoss);
+
+        dsTotal.Tables.Add(dtClass);
+        dsTotal.Tables.Add(dtLoc);
+        dsTotal.Tables.Add(dtLocD);
+        dsTotal.Tables.Add(dtPB);
+        dsTotal.Tables.Add(dtLoss);
+
+        dsTotal.AcceptChanges();
+        
+        return dsTotal;
+    }
+    
     public void postIssue(Issue issue)
     {
         Int32 issue_identity;

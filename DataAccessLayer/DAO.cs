@@ -16,7 +16,8 @@ public class DAO
         SqlConnection con = new SqlConnection(connectionString);
         SqlCommand cmd = new SqlCommand();
         cmd.Connection= con;
-        cmd.CommandText = "select * from [User]";
+        cmd.CommandText = "select * from [User] where Password=Password";
+        //cmd.Parameters.AddWithValue("@Password", "Password");
         con.Open();
         SqlDataAdapter da = new SqlDataAdapter(cmd);
         DataTable dt = new DataTable();
@@ -290,6 +291,29 @@ public class DAO
         daDept.Fill(dtDept);
         con.Close();
         return dtDept;
+    }
+    public DataTable searchIssue(Issue issue)
+    {
+        DataTable dtIssueSearch = new DataTable();
+        string strSQL = "select * from Issue where 1=1 ";
+        if(issue.ID_Classify != 0)
+        {
+            strSQL = strSQL + " and ID_Classify = "+ issue.ID_Classify;
+        }
+        if(issue.ID_Loss != 0)
+        {
+            strSQL = strSQL + " and ID_Loss = " + issue.ID_Loss;
+        }
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmdISSUE = new SqlCommand();
+        cmdISSUE.Connection = con;
+        cmdISSUE.CommandType= CommandType.Text;
+        cmdISSUE.CommandText= strSQL;
+        SqlDataAdapter daSQL = new SqlDataAdapter(cmdISSUE);
+        con.Open();
+        daSQL.Fill(dtIssueSearch);
+        con.Close();
+        return dtIssueSearch;
     }
 }
 

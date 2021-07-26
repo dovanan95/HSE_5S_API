@@ -193,5 +193,15 @@ namespace HSE_5S_API.Controllers
             var json_result = JsonConvert.SerializeObject(dtDept);
             return json_result;
         }
+
+        [HttpPost]
+        [Route("SearchIssue")]
+        public ActionResult<string> searchIssue(Issue issue)
+        {
+            DataTable dtIssueHist = new DataTable();
+            dtIssueHist = clmv.searchIssue(issue);
+            var json_result = JsonConvert.SerializeObject(dtIssueHist);
+            return json_result;
+        }
     }
 }

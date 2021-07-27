@@ -6,6 +6,7 @@ public class Issue
     public int LocationD_ID{get;set;}
     public string PIC{get;set;}
     public string Time_Start{get;set;}
+    public string Time_Until{get;set;}
     public string Time_End{get;set;}
     public string Deadline{get;set;}
     public string Status{get;set;}

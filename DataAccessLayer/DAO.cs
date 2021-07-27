@@ -304,6 +304,10 @@ public class DAO
         {
             strSQL = strSQL + " and ID_Loss = " + issue.ID_Loss;
         }
+        if(issue.Status != "none")
+        {
+            strSQL = strSQL + " and Status = "+ issue.Status;
+        }
         SqlConnection con = new SqlConnection(connectionString);
         SqlCommand cmdISSUE = new SqlCommand();
         cmdISSUE.Connection = con;

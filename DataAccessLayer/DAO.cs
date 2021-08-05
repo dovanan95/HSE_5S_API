@@ -295,19 +295,35 @@ public class DAO
     public DataTable searchIssue(Issue issue)
     {
         DataTable dtIssueSearch = new DataTable();
-        string strSQL = "select * from Issue where 1=1 ";
+        string strSQL = "select a.*,  b.Name_LocationDetail, c.Name_Classify, d.Name_Level  "
+        +" from Issue as a "
+        +"inner join Location_Detail as b on a.ID_LocationD = b.ID_LocationD "
+        +"inner join Classify as c on a.ID_Classify = c.ID_Classify "
+        +"inner join [Level] as d on a.ID_Loss = d.ID_Level "
+        +" where 1=1 and a.Time_Start between '"
+        + issue.Time_Start + "' and '" + issue.Time_Until + "' ";
+
+        //Condition check per selection
         if(issue.ID_Classify != 0)
         {
-            strSQL = strSQL + " and ID_Classify = "+ issue.ID_Classify;
+            strSQL = strSQL + " and a.ID_Classify = "+ issue.ID_Classify;
         }
         if(issue.ID_Loss != 0)
         {
-            strSQL = strSQL + " and ID_Loss = " + issue.ID_Loss;
+            strSQL = strSQL + " and a.ID_Loss = " + issue.ID_Loss;
         }
         if(issue.Status != "none")
         {
-            strSQL = strSQL + " and Status = "+ issue.Status;
+            strSQL = strSQL + " and a.Status = "+ "'"+ issue.Status+"' ";
         }
+        if(issue.LocationD_ID != 0)
+        {
+            strSQL = strSQL + " and a.ID_LocationD = " + issue.LocationD_ID;
+        }
+
+        strSQL = strSQL + " order by a.ID_Issue desc ";
+
+
         SqlConnection con = new SqlConnection(connectionString);
         SqlCommand cmdISSUE = new SqlCommand();
         cmdISSUE.Connection = con;

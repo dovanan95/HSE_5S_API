@@ -335,5 +335,27 @@ public class DAO
         con.Close();
         return dtIssueSearch;
     }
+    public DataTable searchNameIssue(string name)
+    {
+        DataTable dtIssue = new DataTable();
+        
+        string strSQL = "select a.*,  b.Name_LocationDetail, c.Name_Classify, d.Name_Level  "
+        +" from Issue as a "
+        +"inner join Location_Detail as b on a.ID_LocationD = b.ID_LocationD "
+        +"inner join Classify as c on a.ID_Classify = c.ID_Classify "
+        +"inner join [Level] as d on a.ID_Loss = d.ID_Level "
+        +"where a.Name_Issue like '%" +name+"%'" ;
+
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmdSN = new SqlCommand();
+        cmdSN.Connection=con;
+        cmdSN.CommandType= CommandType.Text;
+        cmdSN.CommandText= strSQL;
+        SqlDataAdapter daSN = new SqlDataAdapter(cmdSN);
+        con.Open();
+        daSN.Fill(dtIssue);
+        con.Close();
+        return dtIssue;
+    }
 }
 

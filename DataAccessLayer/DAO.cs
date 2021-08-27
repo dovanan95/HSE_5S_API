@@ -231,6 +231,106 @@ public class DAO
         cmd.ExecuteNonQuery();
         con.Close();
     }
+    public string Update_Issue(Issue issue)
+    {
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlConnection connect_Imprv = new SqlConnection(connectionString);
+        try
+        {
+            SqlCommand cmdUpdate = new SqlCommand();
+            cmdUpdate.Connection = con;
+            cmdUpdate.CommandType=CommandType.Text;
+            cmdUpdate.CommandText = 
+            "update Issue set Name_Issue = @name_issue, "
+            + " ID_LocationD=@id_locd, Deadline = @deadline, ID_Classify = @id_class "
+            + " Picture=@picture, ID_Loss=@id_loss, Content=@content "
+            + " where ID_Issue = @id_issue";
+            cmdUpdate.Parameters.AddWithValue("@name_issue", issue.Name_issue);
+            cmdUpdate.Parameters.AddWithValue("@id_locd", issue.LocationD_ID);
+            cmdUpdate.Parameters.AddWithValue("@deadline", issue.Deadline);
+            cmdUpdate.Parameters.AddWithValue("@id_class", issue.ID_Classify);
+            cmdUpdate.Parameters.AddWithValue("@picture", issue.Picture);
+            cmdUpdate.Parameters.AddWithValue("@id_loss", issue.ID_Loss);
+            cmdUpdate.Parameters.AddWithValue("@content", issue.Content);
+            cmdUpdate.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
+            con.Open();
+            cmdUpdate.ExecuteNonQuery();
+            con.Close();
+
+            SqlCommand cmdGetDeptImp = new SqlCommand();
+            cmdGetDeptImp.Connection = connect_Imprv;
+            cmdGetDeptImp.CommandType = CommandType.Text;
+            cmdGetDeptImp.CommandText = "select * from Improve_Issue where ID_Issue= @id_issue";
+            cmdGetDeptImp.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
+            SqlDataAdapter daGetDept = new SqlDataAdapter(cmdGetDeptImp);
+            DataTable dtGetDept = new DataTable();
+            connect_Imprv.Open();
+            daGetDept.Fill(dtGetDept);
+            connect_Imprv.Close();
+
+            List<int> deptNamePending = new List<int>();
+            List<int> deptNameApproved = new List<int>();
+            for(int i=0; i<dtGetDept.Rows.Count; i++)
+            {
+                if(dtGetDept.Rows[i]["Status"].ToString()=="Pending" || dtGetDept.Rows[i]["Status"].ToString()=="Rejected")
+                {
+                    deptNamePending.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
+                }
+                else if(dtGetDept.Rows[i]["Status"].ToString()=="Approved")
+                {
+                    deptNameApproved.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
+                }      
+            }
+            Console.WriteLine(deptNameApproved);
+            
+            for(int j=0;j<issue.improvement.Count;j++)
+            {
+                for(int jj=0;jj<deptNameApproved.Count;jj++)
+                {
+                    if(issue.improvement[j]==deptNameApproved[jj])
+                    {
+                        issue.improvement.RemoveAt(j);
+                    }
+                }
+            }
+
+            SqlCommand cmdClearDB = new SqlCommand();
+            cmdClearDB.Connection = con;
+            cmdClearDB.CommandType = CommandType.Text;
+            cmdClearDB.CommandText = "delete from Improve_Issue where ID_Issue = @id_issue and Team_Improve = @team_imp";
+            foreach(var item in deptNamePending)
+            {
+                cmdClearDB.Parameters.Clear();
+                cmdClearDB.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
+                cmdClearDB.Parameters.AddWithValue("@team_imp", item);
+                con.Open();
+                cmdClearDB.ExecuteNonQuery();
+                con.Close();
+            }
+
+            SqlCommand cmdUpdateImp = new SqlCommand();
+            cmdUpdateImp.Connection = con;
+            cmdUpdateImp.CommandType = CommandType.Text;
+            cmdUpdateImp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id_issue, @status, @team_imp)";
+            foreach(var item in issue.improvement)
+            {
+                cmdUpdateImp.Parameters.Clear();
+                cmdUpdateImp.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
+                cmdUpdateImp.Parameters.AddWithValue("@status", "Pending");
+                cmdUpdateImp.Parameters.AddWithValue("@team_imp", item);
+                con.Open();
+                cmdClearDB.ExecuteNonQuery();
+                con.Close();
+            }
+
+            return("OK");
+        }
+        catch(Exception ex)
+        {
+            return("NG");
+            con.Close();
+        }
+    }
     public DataTable Login_User(Login_User login_)
     {
         DataTable dtResult_Check = new DataTable();

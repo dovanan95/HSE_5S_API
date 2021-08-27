@@ -1,4 +1,4 @@
-
+using System.Collections.Generic;
 public class Issue
 {
     public int ID_Issue{get;set;}
@@ -14,5 +14,5 @@ public class Issue
     public string Picture{get;set;}
     public int ID_Loss{get;set;}
     public string Content{get;set;}
-    public int[] improvement{get;set;}
+    public List<int> improvement{get;set;}
 }   

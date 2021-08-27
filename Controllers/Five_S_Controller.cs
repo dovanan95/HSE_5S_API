@@ -213,5 +213,20 @@ namespace HSE_5S_API.Controllers
             var json_result = JsonConvert.SerializeObject(dtIssueHist);
             return json_result;
         }
+        
+        [HttpPost]
+        [Route("UpdateIssue")]
+        public ActionResult<string> UpdateIssue([FromBody] Issue issue)
+        {
+            string res = clmv.Update_Issue(issue);
+            if(res=="OK")
+            {
+                return("OK");
+            }
+            else 
+            {
+                return("NG");
+            }
+        }
     }
 }

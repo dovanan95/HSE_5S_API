@@ -268,37 +268,66 @@ public class DAO
             daGetDept.Fill(dtGetDept);
             connect_Imprv.Close();
 
+            List<int> deptNameReject = new List<int>();
             List<int> deptNamePending = new List<int>();
-            List<int> deptNameApproved = new List<int>();
+            List<int> deptNameApprove = new List<int>();
+            List<int> deptNameWaitApprove = new List<int>();
+
+            List<int> deptNameKeep = new List<int>();
+            List<int> deptNameRemove = new List<int>();
+
             for(int i=0; i<dtGetDept.Rows.Count; i++)
             {
-                if(dtGetDept.Rows[i]["Status"].ToString()=="Pending" || dtGetDept.Rows[i]["Status"].ToString()=="Rejected")
+                if(dtGetDept.Rows[i]["Status"].ToString()=="Pending" && dtGetDept.Rows[i]["Time_Improve"] == null)
                 {
                     deptNamePending.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
                 }
+                if(dtGetDept.Rows[i]["Status"].ToString()=="Pending" && dtGetDept.Rows[i]["Time_Improve"] != null)
+                {
+                    deptNameWaitApprove.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
+                }
                 else if(dtGetDept.Rows[i]["Status"].ToString()=="Approved")
                 {
-                    deptNameApproved.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
-                }      
+                    deptNameApprove.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
+                }
+                else if(dtGetDept.Rows[i]["Status"].ToString()=="Rejected")  
+                {
+                    deptNameReject.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
+                }    
             }
-            Console.WriteLine(deptNameApproved);
+            deptNameRemove.AddRange(deptNamePending);
+            deptNameRemove.AddRange(deptNameReject);
             
             for(int j=0;j<issue.improvement.Count;j++)
             {
-                for(int jj=0;jj<deptNameApproved.Count;jj++)
+                if(deptNameApprove.Count>0)
                 {
-                    if(issue.improvement[j]==deptNameApproved[jj])
+                    for(int jj=0;jj<deptNameApprove.Count;jj++)
                     {
-                        issue.improvement.RemoveAt(j);
+                        if(issue.improvement[j]==deptNameApprove[jj])
+                        {
+                            issue.improvement.RemoveAt(j);
+                        }
+                    }
+                }
+                if(deptNamePending.Count>0)
+                {
+                    for(int jt=0;jt<deptNameWaitApprove.Count;jt++)
+                    {
+                        if(issue.improvement[j]==deptNameApprove[jt])
+                        {
+                            issue.improvement.RemoveAt(j);
+                        }
                     }
                 }
             }
+            deptNameKeep.AddRange(issue.improvement);
 
             SqlCommand cmdClearDB = new SqlCommand();
             cmdClearDB.Connection = con;
             cmdClearDB.CommandType = CommandType.Text;
             cmdClearDB.CommandText = "delete from Improve_Issue where ID_Issue = @id_issue and Team_Improve = @team_imp";
-            foreach(var item in deptNamePending)
+            foreach(var item in deptNameRemove)
             {
                 cmdClearDB.Parameters.Clear();
                 cmdClearDB.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
@@ -312,7 +341,7 @@ public class DAO
             cmdUpdateImp.Connection = con;
             cmdUpdateImp.CommandType = CommandType.Text;
             cmdUpdateImp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id_issue, @status, @team_imp)";
-            foreach(var item in issue.improvement)
+            foreach(var item in deptNameKeep)
             {
                 cmdUpdateImp.Parameters.Clear();
                 cmdUpdateImp.Parameters.AddWithValue("@id_issue", issue.ID_Issue);

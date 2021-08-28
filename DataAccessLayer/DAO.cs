@@ -361,8 +361,8 @@ public class DAO
         }
         catch(Exception ex)
         {
-            return("NG");
-            con.Close();
+            return(ex.Message);
+            //con.Close();
         }
     }
     public DataTable Login_User(Login_User login_)

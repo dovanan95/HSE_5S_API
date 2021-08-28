@@ -298,6 +298,7 @@ public class DAO
             deptNameRemove.AddRange(deptNamePending);
             deptNameRemove.AddRange(deptNameReject);
             
+            List<int> index = new List<int>();
             for(int j=0;j<issue.improvement.Count;j++)
             {
                 if(deptNameApprove.Count>0)
@@ -306,7 +307,7 @@ public class DAO
                     {
                         if(issue.improvement[j]==deptNameApprove[jj])
                         {
-                            issue.improvement.RemoveAt(j);
+                            index.Add(j);
                         }
                     }
                 }
@@ -316,10 +317,14 @@ public class DAO
                     {
                         if(issue.improvement[j]==deptNameApprove[jt])
                         {
-                            issue.improvement.RemoveAt(j);
+                            index.Add(j);
                         }
                     }
                 }
+            }
+            foreach(var item in index)
+            {
+                issue.improvement.RemoveAt(item);
             }
             deptNameKeep.AddRange(issue.improvement);
 

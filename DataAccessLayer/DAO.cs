@@ -242,8 +242,8 @@ public class DAO
             cmdUpdate.CommandType=CommandType.Text;
             cmdUpdate.CommandText = 
             "update Issue set Name_Issue = @name_issue, "
-            + " ID_LocationD=@id_locd, Deadline = @deadline, ID_Classify = @id_class "
-            + " Picture=@picture, ID_Loss=@id_loss, Content=@content "
+            + " ID_LocationD=@id_locd, Deadline = @deadline, ID_Classify = @id_class, "
+            + " Picture = @picture, ID_Loss=@id_loss, Content=@content "
             + " where ID_Issue = @id_issue";
             cmdUpdate.Parameters.AddWithValue("@name_issue", issue.Name_issue);
             cmdUpdate.Parameters.AddWithValue("@id_locd", issue.LocationD_ID);
@@ -267,7 +267,7 @@ public class DAO
             connect_Imprv.Open();
             daGetDept.Fill(dtGetDept);
             connect_Imprv.Close();
-
+            
             List<int> deptNameReject = new List<int>();
             List<int> deptNamePending = new List<int>();
             List<int> deptNameApprove = new List<int>();
@@ -327,36 +327,43 @@ public class DAO
                 issue.improvement.RemoveAt(item);
             }
             deptNameKeep.AddRange(issue.improvement);
-
+            
             SqlCommand cmdClearDB = new SqlCommand();
             cmdClearDB.Connection = con;
             cmdClearDB.CommandType = CommandType.Text;
             cmdClearDB.CommandText = "delete from Improve_Issue where ID_Issue = @id_issue and Team_Improve = @team_imp";
-            foreach(var item in deptNameRemove)
+            
+            if(deptNameRemove.Count>0)
             {
-                cmdClearDB.Parameters.Clear();
-                cmdClearDB.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
-                cmdClearDB.Parameters.AddWithValue("@team_imp", item);
-                con.Open();
-                cmdClearDB.ExecuteNonQuery();
-                con.Close();
+                 foreach(var item in deptNameRemove)
+                {
+                    cmdClearDB.Parameters.Clear();
+                    cmdClearDB.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
+                    cmdClearDB.Parameters.AddWithValue("@team_imp", item);
+                    con.Open();
+                    cmdClearDB.ExecuteNonQuery();
+                    con.Close();
+                }
             }
-
+           
             SqlCommand cmdUpdateImp = new SqlCommand();
             cmdUpdateImp.Connection = con;
             cmdUpdateImp.CommandType = CommandType.Text;
             cmdUpdateImp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id_issue, @status, @team_imp)";
-            foreach(var item in deptNameKeep)
+            if(deptNameKeep.Count>0)
             {
-                cmdUpdateImp.Parameters.Clear();
-                cmdUpdateImp.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
-                cmdUpdateImp.Parameters.AddWithValue("@status", "Pending");
-                cmdUpdateImp.Parameters.AddWithValue("@team_imp", item);
-                con.Open();
-                cmdClearDB.ExecuteNonQuery();
-                con.Close();
+                foreach(var item in deptNameKeep)
+                {
+                    cmdUpdateImp.Parameters.Clear();
+                    cmdUpdateImp.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
+                    cmdUpdateImp.Parameters.AddWithValue("@status", "Pending");
+                    cmdUpdateImp.Parameters.AddWithValue("@team_imp", item);
+                    con.Open();
+                    cmdUpdateImp.ExecuteNonQuery();
+                    con.Close();
+                }
             }
-
+            
             return("OK");
         }
         catch(Exception ex)

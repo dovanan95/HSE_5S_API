@@ -225,7 +225,7 @@ namespace HSE_5S_API.Controllers
             }
             else 
             {
-                return("NG");
+                return(res);
             }
         }
     }

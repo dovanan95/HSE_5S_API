@@ -204,6 +204,16 @@ namespace HSE_5S_API.Controllers
             return json_result;
         }
 
+        [HttpGet]
+        [Route("SearchIssueByID")]
+        public string getIssueByID(int ID_Issue)
+        {
+            DataTable dtISD = new DataTable();
+            dtISD=clmv.searchID_Issue(ID_Issue);
+            var json_result = JsonConvert.SerializeObject(dtISD);
+            return json_result;
+        }
+
         [HttpPost]
         [Route("SearchIssue")]
         public ActionResult<string> searchIssue(Issue issue)

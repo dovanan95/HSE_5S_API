@@ -267,7 +267,53 @@ public class DAO
             connect_Imprv.Open();
             daGetDept.Fill(dtGetDept);
             connect_Imprv.Close();
-            
+
+            List<int> DB_TeamImp = new List<int>();
+            for(int i=0; i<dtGetDept.Rows.Count; i++)
+            {
+                DB_TeamImp.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
+            }
+
+            SqlCommand cmdClearDB = new SqlCommand();
+            cmdClearDB.Connection = con;
+            cmdClearDB.CommandType = CommandType.Text;
+            cmdClearDB.CommandText = "delete from Improve_Issue where ID_Issue = @id_issue and Team_Improve = @team_imp";
+
+             if(DB_TeamImp.Count>0)
+            {
+                 foreach(var item in DB_TeamImp)
+                {
+                    cmdClearDB.Parameters.Clear();
+                    cmdClearDB.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
+                    cmdClearDB.Parameters.AddWithValue("@team_imp", item);
+                    con.Open();
+                    cmdClearDB.ExecuteNonQuery();
+                    con.Close();
+                }
+            }
+           
+            SqlCommand cmdUpdateImp = new SqlCommand();
+            cmdUpdateImp.Connection = con;
+            cmdUpdateImp.CommandType = CommandType.Text;
+            cmdUpdateImp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id_issue, @status, @team_imp)";
+            if(issue.improvement.Count>0)
+            {
+                foreach(var item in issue.improvement)
+                {
+                    cmdUpdateImp.Parameters.Clear();
+                    cmdUpdateImp.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
+                    cmdUpdateImp.Parameters.AddWithValue("@status", "Pending");
+                    cmdUpdateImp.Parameters.AddWithValue("@team_imp", item);
+                    con.Open();
+                    cmdUpdateImp.ExecuteNonQuery();
+                    con.Close();
+                }
+            }
+
+            return("OK");
+
+
+            /*
             List<int> deptNameReject = new List<int>();
             List<int> deptNamePending = new List<int>();
             List<int> deptNameApprove = new List<int>();
@@ -363,8 +409,24 @@ public class DAO
                     con.Close();
                 }
             }
+
+            string result = "OK";
+            string comparision = "";
+            if(issue.improvement.Count>DB_TeamImp.Count)
+            {
+                comparision = "Post data is bigger";
+            }
+            else if(issue.improvement.Count<DB_TeamImp.Count)
+            {
+                comparision = "Post data is smaller";
+            }
+            else if(issue.improvement.Count == DB_TeamImp.Count)
+            {
+                comparision = "Equal";
+            }
             
-            return("OK");
+            return("OK");*/
+            
         }
         catch(Exception ex)
         {
@@ -500,6 +562,30 @@ public class DAO
         con.Open();
         daSN.Fill(dtIssue);
         con.Close();
+        return dtIssue;
+    }
+    public DataTable searchID_Issue(int ID_Issue)
+    {
+        DataTable dtIssue = new DataTable();
+
+        string strSQL = "select a.*,  b.Name_LocationDetail, c.Name_Classify, d.Name_Level  "
+        +" from Issue as a "
+        +"inner join Location_Detail as b on a.ID_LocationD = b.ID_LocationD "
+        +"inner join Classify as c on a.ID_Classify = c.ID_Classify "
+        +"inner join [Level] as d on a.ID_Loss = d.ID_Level "
+        +"where a.ID_Issue =@id_issue" ;
+
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmdSN = new SqlCommand();
+        cmdSN.Parameters.AddWithValue("@id_issue", ID_Issue);
+        cmdSN.Connection=con;
+        cmdSN.CommandType= CommandType.Text;
+        cmdSN.CommandText= strSQL;
+        SqlDataAdapter daSN = new SqlDataAdapter(cmdSN);
+        con.Open();
+        daSN.Fill(dtIssue);
+        con.Close();
+        
         return dtIssue;
     }
 }

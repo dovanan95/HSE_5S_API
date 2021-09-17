@@ -401,12 +401,15 @@ public class DAO
         +" from Improve_Issue as a"
         +" inner join Department as b"
         +" on a.Team_Improve = b.ID_Department "
-        +"where a.ID_Issue = @id_issue";
+        +" where a.ID_Issue = @id_issue and not a.Status = 'Rejected' ";
         cmd.Parameters.AddWithValue("@id_issue", ID_Issue);
         SqlDataAdapter daDept = new SqlDataAdapter(cmd);
         con.Open();
         daDept.Fill(dtDept);
         con.Close();
+        
+        DataTable dtFixDup = new DataTable();
+
         return dtDept;
     }
     public DataTable searchIssue(Issue issue)

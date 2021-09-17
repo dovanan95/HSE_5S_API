@@ -268,20 +268,30 @@ public class DAO
             daGetDept.Fill(dtGetDept);
             connect_Imprv.Close();
 
-            List<int> DB_TeamImp = new List<int>();
-            for(int i=0; i<dtGetDept.Rows.Count; i++)
+            List<int> deptNameKeep = new List<int>();
+            List<int> deptNameRemove = new List<int>();
+
+            for(int i=0; i<dtGetDept.Rows.Count;i++)
             {
-                DB_TeamImp.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
+                if(dtGetDept.Rows[i]["Status"].ToString().ToLower() != "reject" && dtGetDept.Rows[i]["Time_Improve"].ToString() != "")
+                {
+                    deptNameKeep.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
+                }
+                else if(dtGetDept.Rows[i]["Status"].ToString().ToLower() == "reject" || dtGetDept.Rows[i]["Time_Improve"].ToString() == "")
+                {
+                    deptNameRemove.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
+                }
             }
+
 
             SqlCommand cmdClearDB = new SqlCommand();
             cmdClearDB.Connection = con;
             cmdClearDB.CommandType = CommandType.Text;
             cmdClearDB.CommandText = "delete from Improve_Issue where ID_Issue = @id_issue and Team_Improve = @team_imp";
 
-             if(DB_TeamImp.Count>0)
+             if(deptNameRemove.Count>0)
             {
-                 foreach(var item in DB_TeamImp)
+                 foreach(var item in deptNameRemove)
                 {
                     cmdClearDB.Parameters.Clear();
                     cmdClearDB.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
@@ -300,132 +310,32 @@ public class DAO
             {
                 foreach(var item in issue.improvement)
                 {
-                    cmdUpdateImp.Parameters.Clear();
-                    cmdUpdateImp.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
-                    cmdUpdateImp.Parameters.AddWithValue("@status", "Pending");
-                    cmdUpdateImp.Parameters.AddWithValue("@team_imp", item);
-                    con.Open();
-                    cmdUpdateImp.ExecuteNonQuery();
-                    con.Close();
+                    var flag = 0;
+                    for(int k=0; k<deptNameKeep.Count; k++)
+                    {
+                        if(item==deptNameKeep[k])
+                        {
+                            flag=1;
+                        }
+                    }
+                    if(flag==0)
+                    {
+                        cmdUpdateImp.Parameters.Clear();
+                        cmdUpdateImp.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
+                        cmdUpdateImp.Parameters.AddWithValue("@status", "Pending");
+                        cmdUpdateImp.Parameters.AddWithValue("@team_imp", item);
+                        con.Open();
+                        cmdUpdateImp.ExecuteNonQuery();
+                        con.Close();
+                    } 
+                    else if(flag==1)
+                    {
+                        Console.WriteLine("pass");
+                    }
                 }
             }
 
             return("OK");
-
-
-            /*
-            List<int> deptNameReject = new List<int>();
-            List<int> deptNamePending = new List<int>();
-            List<int> deptNameApprove = new List<int>();
-            List<int> deptNameWaitApprove = new List<int>();
-
-            List<int> deptNameKeep = new List<int>();
-            List<int> deptNameRemove = new List<int>();
-
-            for(int i=0; i<dtGetDept.Rows.Count; i++)
-            {
-                if(dtGetDept.Rows[i]["Status"].ToString()=="Pending" && dtGetDept.Rows[i]["Time_Improve"] == null)
-                {
-                    deptNamePending.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
-                }
-                if(dtGetDept.Rows[i]["Status"].ToString()=="Pending" && dtGetDept.Rows[i]["Time_Improve"] != null)
-                {
-                    deptNameWaitApprove.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
-                }
-                else if(dtGetDept.Rows[i]["Status"].ToString()=="Approved")
-                {
-                    deptNameApprove.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
-                }
-                else if(dtGetDept.Rows[i]["Status"].ToString()=="Rejected")  
-                {
-                    deptNameReject.Add(Convert.ToInt32(dtGetDept.Rows[i]["Team_Improve"]));
-                }    
-            }
-            deptNameRemove.AddRange(deptNamePending);
-            deptNameRemove.AddRange(deptNameReject);
-            
-            List<int> index = new List<int>();
-            for(int j=0;j<issue.improvement.Count;j++)
-            {
-                if(deptNameApprove.Count>0)
-                {
-                    for(int jj=0;jj<deptNameApprove.Count;jj++)
-                    {
-                        if(issue.improvement[j]==deptNameApprove[jj])
-                        {
-                            index.Add(j);
-                        }
-                    }
-                }
-                if(deptNamePending.Count>0)
-                {
-                    for(int jt=0;jt<deptNameWaitApprove.Count;jt++)
-                    {
-                        if(issue.improvement[j]==deptNameApprove[jt])
-                        {
-                            index.Add(j);
-                        }
-                    }
-                }
-            }
-            foreach(var item in index)
-            {
-                issue.improvement.RemoveAt(item);
-            }
-            deptNameKeep.AddRange(issue.improvement);
-            
-            SqlCommand cmdClearDB = new SqlCommand();
-            cmdClearDB.Connection = con;
-            cmdClearDB.CommandType = CommandType.Text;
-            cmdClearDB.CommandText = "delete from Improve_Issue where ID_Issue = @id_issue and Team_Improve = @team_imp";
-            
-            if(deptNameRemove.Count>0)
-            {
-                 foreach(var item in deptNameRemove)
-                {
-                    cmdClearDB.Parameters.Clear();
-                    cmdClearDB.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
-                    cmdClearDB.Parameters.AddWithValue("@team_imp", item);
-                    con.Open();
-                    cmdClearDB.ExecuteNonQuery();
-                    con.Close();
-                }
-            }
-           
-            SqlCommand cmdUpdateImp = new SqlCommand();
-            cmdUpdateImp.Connection = con;
-            cmdUpdateImp.CommandType = CommandType.Text;
-            cmdUpdateImp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id_issue, @status, @team_imp)";
-            if(deptNameKeep.Count>0)
-            {
-                foreach(var item in deptNameKeep)
-                {
-                    cmdUpdateImp.Parameters.Clear();
-                    cmdUpdateImp.Parameters.AddWithValue("@id_issue", issue.ID_Issue);
-                    cmdUpdateImp.Parameters.AddWithValue("@status", "Pending");
-                    cmdUpdateImp.Parameters.AddWithValue("@team_imp", item);
-                    con.Open();
-                    cmdUpdateImp.ExecuteNonQuery();
-                    con.Close();
-                }
-            }
-
-            string result = "OK";
-            string comparision = "";
-            if(issue.improvement.Count>DB_TeamImp.Count)
-            {
-                comparision = "Post data is bigger";
-            }
-            else if(issue.improvement.Count<DB_TeamImp.Count)
-            {
-                comparision = "Post data is smaller";
-            }
-            else if(issue.improvement.Count == DB_TeamImp.Count)
-            {
-                comparision = "Equal";
-            }
-            
-            return("OK");*/
             
         }
         catch(Exception ex)

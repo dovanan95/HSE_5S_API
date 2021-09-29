@@ -200,7 +200,7 @@ public class DAO
         SqlCommand cmd = new SqlCommand();
         cmd.CommandType = CommandType.Text;
         cmd.Connection = con;
-        cmd.CommandText ="update Improve_Issue set  Title=@Title, Picture=@Picture, Time_Improve=@Time_Improve,  Content=Content "
+        cmd.CommandText ="update Improve_Issue set  Title=@Title, Picture=@Picture, Time_Improve=@Time_Improve,  Content=@Content "
         + "where ID_Issue=@ID_Issue and Team_Improve = @Team_imp";
         cmd.Parameters.AddWithValue("@ID_Issue", improvement.ID_Issue);
         cmd.Parameters.AddWithValue("@Team_imp", improvement.Team_Improve);

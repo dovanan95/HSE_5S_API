@@ -390,6 +390,22 @@ public class DAO
         con.Close();
         return dtGeneralIssue;
     }
+
+    public DataTable Trace_Imp_by_Issue(int ID_Issue)
+    {
+        DataTable dtImpOnIssue = new DataTable();
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmd = new SqlCommand();
+        cmd.Connection = con;
+        cmd.CommandType = CommandType.Text;
+        cmd.CommandText = "select * from Improve_Issue where ID_Issue = @ID_Issue";
+        cmd.Parameters.AddWithValue("@ID_Issue", ID_Issue);
+        SqlDataAdapter dataAdapter = new SqlDataAdapter(cmd);
+        con.Open();
+        dataAdapter.Fill(dtImpOnIssue);
+        con.Close();
+        return dtImpOnIssue;
+    }
     public DataTable deptImprove(int ID_Issue)
     {
         DataTable dtDept = new DataTable();

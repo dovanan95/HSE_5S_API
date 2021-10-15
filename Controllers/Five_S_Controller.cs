@@ -185,6 +185,16 @@ namespace HSE_5S_API.Controllers
         }
 
         [HttpGet]
+        [Route("traceImpByIssue")]
+        public string traceImpByIssue(int ID_Issue)
+        {
+            DataTable dtImp = new DataTable();
+            dtImp = clmv.Trace_Imp_by_Issue(ID_Issue);
+            var json_result = JsonConvert.SerializeObject(dtImp);
+            return json_result;
+        }
+
+        [HttpGet]
         [Route("getDeptImprove")]
         public string getDeptImprove(int ID_Issue)
         {
@@ -237,6 +247,45 @@ namespace HSE_5S_API.Controllers
             {
                 return(res);
             }
+        }
+        [HttpPost]
+        [Route("ImproveDecision")]
+        public ActionResult<string> ImproveDecision([FromBody] Improvement improvement)
+        {
+            SqlConnection con = new SqlConnection(DAO.connectionString);
+            SqlConnection con2 = new SqlConnection(DAO.connectionString);
+            SqlCommand cmdExec = new SqlCommand();
+            //SqlCommand cmdReImp = new SqlCommand();
+            cmdExec.CommandType=CommandType.Text;
+            cmdExec.Connection = con;
+            cmdExec.CommandText = "update Improve_Issue set Status = @status";
+
+            SqlCommand cmdReImp = new SqlCommand();
+            cmdReImp.Connection = con2;
+            cmdReImp.CommandType = CommandType.Text;
+            cmdReImp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id, @status, @team)";
+            if(improvement.Status.ToString().ToLower()=="approve")
+            {
+                cmdExec.Parameters.AddWithValue("@status", "Approve");
+                con.Open();
+                cmdExec.ExecuteNonQuery();
+                con.Close();
+            }
+            else if(improvement.Status.ToString().ToLower()=="reject")
+            {
+                cmdExec.Parameters.AddWithValue("@status", "Reject");
+                con.Open();
+                cmdExec.ExecuteNonQuery();
+                con.Close();
+
+                cmdReImp.Parameters.AddWithValue("@id", improvement.ID_Issue);
+                cmdReImp.Parameters.AddWithValue("status", "Pending");
+                cmdReImp.Parameters.AddWithValue("@team", improvement.Team_Improve);
+                con2.Open();
+                cmdReImp.ExecuteNonQuery();
+                con2.Close();
+            }
+            return("OK");
         }
     }
 }

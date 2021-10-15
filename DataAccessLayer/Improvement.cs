@@ -14,6 +14,7 @@ public class Improvement
     public string Content{get;set;}
     public string Picture{get;set;}
     public int Team_Improve{get;set;}
+    public string Status{get;set;}
 
     public DataTable GetFromDB(string sqlQueryString, List<Improvement> param)
     {

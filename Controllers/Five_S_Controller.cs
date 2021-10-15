@@ -193,6 +193,15 @@ namespace HSE_5S_API.Controllers
             var json_result = JsonConvert.SerializeObject(dtImp);
             return json_result;
         }
+        [HttpGet]
+        [Route("getImpDetail")]
+        public string getImpDetail(int ID_Improve)
+        {
+            DataTable dtImp = new DataTable();
+            dtImp = clmv.Trace_Imp_by_Imp_ID(ID_Improve);
+            var json_result = JsonConvert.SerializeObject(dtImp);
+            return json_result;
+        }
 
         [HttpGet]
         [Route("getDeptImprove")]

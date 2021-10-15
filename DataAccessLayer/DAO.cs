@@ -406,6 +406,23 @@ public class DAO
         con.Close();
         return dtImpOnIssue;
     }
+    public DataTable Trace_Imp_by_Imp_ID(int ID_Imp)
+    {
+        DataTable dtImpOnImp = new DataTable();
+        SqlConnection con = new SqlConnection(connectionString);
+        SqlCommand cmdImp = new SqlCommand();
+        cmdImp.Connection = con;
+        cmdImp.CommandType = CommandType.Text;
+        cmdImp.CommandText = "select a.*, b.Name_Department " +
+        "from Improve_Issue as a inner join Department as b on a.Team_improve "+
+        " = b.ID_Department where a.ID_Improve = @ID_Imp";
+        cmdImp.Parameters.AddWithValue("@ID_Imp", ID_Imp);
+        SqlDataAdapter daImp = new SqlDataAdapter(cmdImp);
+        con.Open();
+        daImp.Fill(dtImpOnImp);
+        con.Close();
+        return dtImpOnImp;
+    }
     public DataTable deptImprove(int ID_Issue)
     {
         DataTable dtDept = new DataTable();

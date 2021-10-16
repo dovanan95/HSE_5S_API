@@ -8,6 +8,7 @@ using System.Data;
 
 public class Improvement
 {
+    public int ID_Improve{get;set;}
     public int ID_Issue{get;set;}
     public string Title{get;set;}
     public string Time_Improved{get;set;}

@@ -267,7 +267,7 @@ namespace HSE_5S_API.Controllers
             //SqlCommand cmdReImp = new SqlCommand();
             cmdExec.CommandType=CommandType.Text;
             cmdExec.Connection = con;
-            cmdExec.CommandText = "update Improve_Issue set Status = @status";
+            cmdExec.CommandText = "update Improve_Issue set Status = @status where ID_Improve =@id_imp";
 
             SqlCommand cmdReImp = new SqlCommand();
             cmdReImp.Connection = con2;
@@ -275,6 +275,7 @@ namespace HSE_5S_API.Controllers
             cmdReImp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id, @status, @team)";
             if(improvement.Status.ToString().ToLower()=="approve")
             {
+                cmdExec.Parameters.AddWithValue("@id_imp", improvement.ID_Improve);
                 cmdExec.Parameters.AddWithValue("@status", "Approve");
                 con.Open();
                 cmdExec.ExecuteNonQuery();
@@ -282,6 +283,7 @@ namespace HSE_5S_API.Controllers
             }
             else if(improvement.Status.ToString().ToLower()=="reject")
             {
+                cmdExec.Parameters.AddWithValue("@id_imp", improvement.ID_Improve);
                 cmdExec.Parameters.AddWithValue("@status", "Reject");
                 con.Open();
                 cmdExec.ExecuteNonQuery();

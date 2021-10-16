@@ -398,7 +398,9 @@ public class DAO
         SqlCommand cmd = new SqlCommand();
         cmd.Connection = con;
         cmd.CommandType = CommandType.Text;
-        cmd.CommandText = "select * from Improve_Issue where ID_Issue = @ID_Issue";
+        cmd.CommandText = "select a.*, b.Name_Department"
+        +" from Improve_Issue as a inner join Department as b on a.Team_improve = b.ID_Department"
+        +" where ID_Issue = @ID_Issue";
         cmd.Parameters.AddWithValue("@ID_Issue", ID_Issue);
         SqlDataAdapter dataAdapter = new SqlDataAdapter(cmd);
         con.Open();

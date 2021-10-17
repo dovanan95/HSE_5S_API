@@ -425,6 +425,92 @@ public class DAO
         con.Close();
         return dtImpOnImp;
     }
+    public string Improve_Decision(Improvement improvement)
+    {
+        try{
+            SqlConnection con = new SqlConnection(connectionString);
+                SqlConnection con2 = new SqlConnection(connectionString);
+                SqlCommand cmdExec = new SqlCommand();
+                //SqlCommand cmdReImp = new SqlCommand();
+                cmdExec.CommandType=CommandType.Text;
+                cmdExec.Connection = con;
+                cmdExec.CommandText = "update Improve_Issue set Status = @status where ID_Improve =@id_imp";
+
+                SqlCommand cmdReImp = new SqlCommand();
+                cmdReImp.Connection = con2;
+                cmdReImp.CommandType = CommandType.Text;
+                cmdReImp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id, @status, @team)";
+
+                SqlCommand cmdCleanPending = new SqlCommand();
+                cmdCleanPending.Connection = con;
+                cmdCleanPending.CommandType = CommandType.Text;
+                cmdCleanPending.CommandText = "delete from Improve_Issue where ID_Improve = @ID";
+                //cmdCleanPending.Parameters.AddWithValue("@ID", improvement.ID_Improve);
+
+                
+                if(improvement.Status.ToString().ToLower()=="approve")
+                {
+                    cmdExec.Parameters.AddWithValue("@id_imp", improvement.ID_Improve);
+                    cmdExec.Parameters.AddWithValue("@status", "Approve");
+                    con.Open();
+                    cmdExec.ExecuteNonQuery();
+                    con.Close();
+                    
+                    SqlCommand cmdGetPendingKey = new SqlCommand();
+                    cmdGetPendingKey.Connection = con2;
+                    cmdGetPendingKey.CommandType = CommandType.Text;
+                    cmdGetPendingKey.CommandText =
+                    "select ID_Improve from Improve_Issue"+
+                    " where ID_Issue = @id_issue and Team_Improve = @team"+
+                    " and Status ='Pending'";
+                    cmdGetPendingKey.Parameters.AddWithValue("@id_issue",improvement.ID_Issue);
+                    cmdGetPendingKey.Parameters.AddWithValue("@team", improvement.Team_Improve);
+                    SqlDataAdapter daGetPendingKey = new SqlDataAdapter(cmdGetPendingKey);
+                    DataTable dtGetPending = new DataTable();
+                    daGetPendingKey.Fill(dtGetPending);
+
+                    List<int> impID_pending = new List<int>();
+
+                    for(int i=0; i<dtGetPending.Rows.Count;i++)
+                    {
+                        impID_pending.Add(Convert.ToInt32(dtGetPending.Rows[i]["ID_Improve"]));
+                    }
+
+                    if(impID_pending.Count>0)
+                    {
+                        //code
+                        for(int j=0; j<impID_pending.Count;j++)
+                        {
+                            cmdCleanPending.Parameters.Clear();
+                            cmdCleanPending.Parameters.AddWithValue("@ID", impID_pending[j]);
+                            con.Open();
+                            cmdCleanPending.ExecuteNonQuery();
+                            con.Close();
+                        }
+                    }
+                }
+                else if(improvement.Status.ToString().ToLower()=="reject")
+                {
+                    cmdExec.Parameters.AddWithValue("@id_imp", improvement.ID_Improve);
+                    cmdExec.Parameters.AddWithValue("@status", "Reject");
+                    con.Open();
+                    cmdExec.ExecuteNonQuery();
+                    con.Close();
+
+                    cmdReImp.Parameters.AddWithValue("@id", improvement.ID_Issue);
+                    cmdReImp.Parameters.AddWithValue("status", "Pending");
+                    cmdReImp.Parameters.AddWithValue("@team", improvement.Team_Improve);
+                    con2.Open();
+                    cmdReImp.ExecuteNonQuery();
+                    con2.Close();
+                }
+            return("OK");
+        }
+        catch(Exception ex)
+        {
+            return(ex.Message.ToString());
+        }
+    }
     public DataTable deptImprove(int ID_Issue)
     {
         DataTable dtDept = new DataTable();

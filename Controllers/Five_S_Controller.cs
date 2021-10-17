@@ -261,42 +261,15 @@ namespace HSE_5S_API.Controllers
         [Route("ImproveDecision")]
         public ActionResult<string> ImproveDecision([FromBody] Improvement improvement)
         {
-            SqlConnection con = new SqlConnection(DAO.connectionString);
-            SqlConnection con2 = new SqlConnection(DAO.connectionString);
-            SqlCommand cmdExec = new SqlCommand();
-            //SqlCommand cmdReImp = new SqlCommand();
-            cmdExec.CommandType=CommandType.Text;
-            cmdExec.Connection = con;
-            cmdExec.CommandText = "update Improve_Issue set Status = @status where ID_Improve =@id_imp";
-
-            SqlCommand cmdReImp = new SqlCommand();
-            cmdReImp.Connection = con2;
-            cmdReImp.CommandType = CommandType.Text;
-            cmdReImp.CommandText = "insert into Improve_Issue(ID_Issue, Status, Team_Improve) values(@id, @status, @team)";
-            if(improvement.Status.ToString().ToLower()=="approve")
+            string res = clmv.Improve_Decision(improvement);
+            if(res=="OK")
             {
-                cmdExec.Parameters.AddWithValue("@id_imp", improvement.ID_Improve);
-                cmdExec.Parameters.AddWithValue("@status", "Approve");
-                con.Open();
-                cmdExec.ExecuteNonQuery();
-                con.Close();
+                return("OK");
             }
-            else if(improvement.Status.ToString().ToLower()=="reject")
+            else
             {
-                cmdExec.Parameters.AddWithValue("@id_imp", improvement.ID_Improve);
-                cmdExec.Parameters.AddWithValue("@status", "Reject");
-                con.Open();
-                cmdExec.ExecuteNonQuery();
-                con.Close();
-
-                cmdReImp.Parameters.AddWithValue("@id", improvement.ID_Issue);
-                cmdReImp.Parameters.AddWithValue("status", "Pending");
-                cmdReImp.Parameters.AddWithValue("@team", improvement.Team_Improve);
-                con2.Open();
-                cmdReImp.ExecuteNonQuery();
-                con2.Close();
+                return(res);
             }
-            return("OK");
         }
     }
 }
